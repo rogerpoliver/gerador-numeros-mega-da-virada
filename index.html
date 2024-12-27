@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Números da Mega</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        input, button {
+            padding: 10px;
+            margin: 10px 0;
+            width: 100%;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .output {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gerador de Números da Mega</h1>
+        <label for="dates">Digite as datas de aniversário (separadas por vírgulas):</label>
+        <input type="text" id="dates" placeholder="Ex: 01/01/2000, 25/12/1995">
+
+        <label for="names">Digite os nomes das pessoas queridas (separados por vírgulas):</label>
+        <input type="text" id="names" placeholder="Ex: João, Maria, Ana">
+
+        <label for="quantity">Quantidade de números a gerar:</label>
+        <input type="number" id="quantity" min="1" max="60" value="9">
+
+        <button onclick="generateNumbers()">Gerar Números</button>
+
+        <div class="output" id="output"></div>
+    </div>
+
+    <script>
+        function calculateNameValue(name) {
+            const vowels = 'AEIOUaeiou';
+            let value = name.replace(/\s+/g, '').length;
+
+            for (let i = 0; i < name.length; i++) {
+                if (vowels.includes(name[i])) {
+                    value += i + 1;
+                }
+            }
+            return value;
+        }
+
+        function seededRandom(seed) {
+            let x = Math.sin(seed++) * 10000;
+            return x - Math.floor(x);
+        }
+
+        function generateMegaNumbers(seed, quantity) {
+            const numbers = new Set();
+            while (numbers.size < quantity) {
+                const number = Math.floor(seededRandom(seed) * 60) + 1;
+                numbers.add(number);
+                seed++;
+            }
+            return Array.from(numbers).sort((a, b) => a - b);
+        }
+
+        function generateNumbers() {
+            const datesInput = document.getElementById('dates').value;
+            const namesInput = document.getElementById('names').value;
+            const quantity = parseInt(document.getElementById('quantity').value);
+
+            const dates = datesInput.split(',').map(date => date.trim());
+            const names = namesInput.split(',').map(name => name.trim());
+
+            const dateValues = dates.map(date => {
+                return date.split('').reduce((acc, char) => {
+                    return acc + (isNaN(parseInt(char)) ? 0 : parseInt(char));
+                }, 0);
+            });
+
+            const nameValues = names.map(name => calculateNameValue(name));
+
+            const seed = dateValues.reduce((a, b) => a + b, 0) + nameValues.reduce((a, b) => a + b, 0);
+
+            const numbers = generateMegaNumbers(seed, quantity);
+
+            document.getElementById('output').innerText = `Números Gerados: ${numbers.join(', ')}`;
+        }
+    </script>
+</body>
+</html>
